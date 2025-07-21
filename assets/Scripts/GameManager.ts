@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, instantiate, Prefab, Game, director } from 'cc';
+import { _decorator, Component, Node, instantiate, Prefab, Game, director, SpriteFrame, Sprite } from 'cc';
 import { ScoreDisplay } from './ScoreDisplay';
 const { ccclass, property } = _decorator;
 
@@ -24,6 +24,21 @@ export class GameManager extends Component {
 
     @property(ScoreDisplay)
     highScoreDisplay: ScoreDisplay = null!;
+
+    @property(Node)
+    medalDisplay: Node = null!;
+
+    @property(SpriteFrame)
+    medalBronze: SpriteFrame = null!;
+
+    @property(SpriteFrame)
+    medalSilver: SpriteFrame = null!;
+
+    @property(SpriteFrame)
+    medalGold: SpriteFrame = null!;
+
+    @property(SpriteFrame)
+    medalPlatinum: SpriteFrame = null!;
 
     private score = 0;
     private timer = 0;
@@ -77,6 +92,21 @@ export class GameManager extends Component {
 
         const finalHighScore = Math.max(this.score, saveHighScore);
         this.highScoreDisplay.updateScore(finalHighScore);
+
+        const medalSprite = this.medalDisplay.getComponent(Sprite);
+        if (medalSprite) {
+        if (this.score >= 50) {
+            medalSprite.spriteFrame = this.medalPlatinum;
+        } else if (this.score >= 30) {
+            medalSprite.spriteFrame = this.medalGold;
+        } else if (this.score >= 20) {
+            medalSprite.spriteFrame = this.medalSilver;
+        } else if (this.score >= 10) {
+            medalSprite.spriteFrame = this.medalBronze;
+        } else {
+            medalSprite.spriteFrame = null;
+        }
+    }
 
         this.pipeParent.children.forEach(pipe => pipe.active = false);
     }
