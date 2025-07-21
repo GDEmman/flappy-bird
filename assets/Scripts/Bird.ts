@@ -32,6 +32,8 @@ export class Bird extends Component {
         if(otherCollider.tag === 1 || otherCollider.tag === 2){
             console.log('🐤 Bird collided!');
             this.node.active = false;
+
+            GameManager.instance.gameOver();
         }
 
         else if(otherCollider.tag === 3){
