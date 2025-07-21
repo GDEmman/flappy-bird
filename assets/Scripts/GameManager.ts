@@ -1,4 +1,5 @@
 import { _decorator, Component, Node, instantiate, Prefab } from 'cc';
+import { ScoreDisplay } from './ScoreDisplay';
 const { ccclass, property } = _decorator;
 
 @ccclass('GameManager')
@@ -10,7 +11,17 @@ export class GameManager extends Component {
     @property(Node)
     pipeParent: Node = null!;
 
+    @property(Node)
+    scoreDisplayNode: Node = null!;
+
+    private score = 0;
+
     private timer = 0;
+
+    start(){
+        const scoreDisplay = this.scoreDisplayNode.getComponent(ScoreDisplay);
+        scoreDisplay?.updateScore(this.score);
+    }
 
     update(deltaTime: number) {
         this.timer += deltaTime;
@@ -27,5 +38,14 @@ export class GameManager extends Component {
         this.pipeParent.addChild(pipe);
     }
 
+    increaseScore() {
+        console.log('Score: '+this.score++);
+        const display = this.scoreDisplayNode.getComponent(ScoreDisplay);
+        display?.updateScore(this.score);
+    }
+
+    
+
 }
-
+
+

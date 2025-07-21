@@ -1,4 +1,5 @@
 ﻿import { _decorator, Component, Node, RigidBody2D, Vec2, input, Input, EventTouch, Collider2D, Contact2DType, IPhysics2DContact } from 'cc';
+import { GameManager } from './GameManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('Bird')
@@ -8,6 +9,11 @@ export class Bird extends Component {
     rigidBody: RigidBody2D = null;
 
     private collider: Collider2D | null = null;
+
+    @property([GameManager])
+    gameManager: GameManager;
+
+    private triggered = false;
 
     onLoad() {
         this.collider = this.getComponent(Collider2D);
@@ -21,21 +27,28 @@ export class Bird extends Component {
         this.collider?.off(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
     }
 
-    private onBeginContact(
-        selfCollider: Collider2D,
-        otherCollider: Collider2D,
-        contact: IPhysics2DContact | null
-    ) {
-        console.log('🐤 Bird collided!');
+    private onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
+        
+        if(otherCollider.tag === 1 || otherCollider.tag === 2){
+            console.log('🐤 Bird collided!');
+            this.node.active = false;
+        }
 
+        else if(otherCollider.tag === 3){
+            this.triggered = true;
+
+            const managerScript = this.gameManager.getComponent(GameManager);
+            managerScript?.increaseScore();
+        }
+
+        if(this.triggered) return;
         // Example Game Over Logic
-        this.node.active = false;
 
         // TODO: Trigger GameManager to show Game Over UI or reset
     }
 
     start() {
-        input.on(Input.EventType.TOUCH_START, this.flap, this);
+        input.on(Input.EventType.MOUSE_DOWN, this.flap, this);
 
         const collider = this.node.getComponent(Collider2D);
         if (collider) {
