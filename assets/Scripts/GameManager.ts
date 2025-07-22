@@ -1,5 +1,6 @@
 import { _decorator, Component, Node, instantiate, Prefab, Game, director, SpriteFrame, Sprite } from 'cc';
 import { ScoreDisplay } from './ScoreDisplay';
+import { Bird } from './Bird';
 const { ccclass, property } = _decorator;
 
 @ccclass('GameManager')
@@ -18,6 +19,9 @@ export class GameManager extends Component {
 
     @property(Node)
     gameOverUI: Node = null!;
+
+    @property(Node)
+    birdNode: Node = null!;
 
     @property(ScoreDisplay)
     finalScoreDisplay: ScoreDisplay = null!;
@@ -79,6 +83,9 @@ export class GameManager extends Component {
     gameOver(){
         console.log("Game Over!");
         this.isGameOver = true;
+
+        const bird = this.birdNode.getComponent(Bird);
+        bird?.onGameOver();
 
         this.gameOverUI .active = true;
 
