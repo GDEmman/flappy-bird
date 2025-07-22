@@ -1,4 +1,6 @@
-﻿import { _decorator, Component, Node, RigidBody2D, Vec2, Vec3, input, Input, EventTouch, Collider2D, Contact2DType, IPhysics2DContact } from 'cc';
+﻿import { _decorator, Component, Node, RigidBody2D, Vec2, Vec3, input, Input, 
+    EventTouch, Collider2D, Contact2DType, IPhysics2DContact,
+    AudioClip, AudioSource } from 'cc';
 import { GameManager } from './GameManager';
 const { ccclass, property } = _decorator;
 
@@ -13,6 +15,15 @@ export class Bird extends Component {
     @property([GameManager])
     gameManager: GameManager;
 
+    @property({ type: AudioClip })
+    flapSFX: AudioClip = null!;
+
+    @property({ type: AudioClip })
+    deadSFX: AudioClip = null!;
+
+
+    private audioSource: AudioSource = null!;
+
     private triggered = false;
 
     private isGameOver = false;
@@ -20,12 +31,25 @@ export class Bird extends Component {
     start() {
 
         this.rigidBody = this.getComponent(RigidBody2D)!;
+        this.audioSource = this.node.addComponent(AudioSource);
 
         input.on(Input.EventType.MOUSE_DOWN, this.flap, this);
 
         const collider = this.node.getComponent(Collider2D);
         if (collider) {
             collider.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
+        }
+    }
+
+    playFlapSound() {
+        if (this.flapSFX && this.audioSource) {
+            this.audioSource.playOneShot(this.flapSFX);
+        }
+    }
+
+    playDeadSound(){
+         if (this.deadSFX && this.audioSource) {
+            this.audioSource.playOneShot(this.deadSFX);
         }
     }
 
@@ -58,6 +82,7 @@ export class Bird extends Component {
         
         if(otherCollider.tag === 1 || otherCollider.tag === 2 || otherCollider.tag === 4){
             console.log('🐤 Bird collided!');
+            this.playDeadSound();
             this.node.active = false;
 
             GameManager.instance.gameOver();
@@ -85,6 +110,7 @@ export class Bird extends Component {
     }
 
     flap() {
+        this.playFlapSound();
         this.rigidBody.linearVelocity = new Vec2(0, 15);
     }
 }

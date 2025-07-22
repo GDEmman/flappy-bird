@@ -224,6 +224,14 @@
       "__id__": 6
     },
     "gameManager": null,
+    "flapSFX": {
+      "__uuid__": "e444127e-3b6d-4df7-a407-3f9b78b796bd",
+      "__expectedType__": "cc.AudioClip"
+    },
+    "deadSFX": {
+      "__uuid__": "b6ec8f82-f310-422f-a904-2936755c9e27",
+      "__expectedType__": "cc.AudioClip"
+    },
     "_id": ""
   },
   {
