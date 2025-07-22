@@ -1,6 +1,7 @@
-import { _decorator, Component, Node, instantiate, Prefab, Game, director, SpriteFrame, Sprite } from 'cc';
+import { _decorator, Component, Node, instantiate, Prefab, director, SpriteFrame, Sprite, input, Input, tween, Vec3, Tween } from 'cc';
 import { ScoreDisplay } from './ScoreDisplay';
 import { Bird } from './Bird';
+import { Pipe } from './Pipe';
 const { ccclass, property } = _decorator;
 
 @ccclass('GameManager')
@@ -44,27 +45,79 @@ export class GameManager extends Component {
     @property(SpriteFrame)
     medalPlatinum: SpriteFrame = null!;
 
+    @property(Node)
+    mainMenu: Node = null!;
+
     private score = 0;
     private timer = 0;
     private isGameOver = false;
+
+    private isWaiting = true;
+    private originalPos: Vec3 = new Vec3();
+
+    private isGameStart = false;
 
     onLoad(){
         GameManager.instance = this;
     }
 
     start(){
-        const scoreDisplay = this.scoreDisplayNode.getComponent(ScoreDisplay);
-        scoreDisplay?.updateScore(this.score);
+        if (this.isWaiting) {
+            this.originalPos = this.birdNode.position.clone();
+            this.startHoverAnimation();
+        }
 
+        const bird = this.birdNode.getComponent(Bird);
+        bird.rigidBody.enabled = false;
+
+        this.scoreDisplayNode.active = false;
         this.gameOverUI.active = false;
+        this.pipeParent.active = false;
+        
+        this.mainMenu.active = true;
+
+        input.on(Input.EventType.MOUSE_DOWN, this.gameStart, this);
     }
 
     update(deltaTime: number) {
         this.timer += deltaTime;
         if (this.timer > 2.5) {
-            this.spawnTime();
-            this.timer = 0;
+            if(this.isGameStart == true){
+                this.spawnTime();
+                this.timer = 0;
+            }
         }
+    }
+
+    startHoverAnimation() {
+        const up = new Vec3(this.originalPos.x, this.originalPos.y + 10, this.originalPos.z);
+        const down = new Vec3(this.originalPos.x, this.originalPos.y - 10, this.originalPos.z);
+
+        tween(this.birdNode)
+            .repeatForever(
+                tween()
+                    .to(0.6, { position: up }, { easing: 'sineInOut' })
+                    .to(0.6, { position: down }, { easing: 'sineInOut' })
+            )
+            .start();
+    }
+
+    gameStart(){
+        this.birdNode.active = true;
+        this.pipeParent.active = true;
+        this.mainMenu.active = false;
+        this.scoreDisplayNode.active = true;
+
+        const scoreDisplay = this.scoreDisplayNode.getComponent(ScoreDisplay);
+        scoreDisplay?.updateScore(this.score);
+
+        const bird = this.birdNode.getComponent(Bird);
+        bird.rigidBody.enabled = true;
+
+        this.isWaiting = false;
+        Tween.stopAllByTarget(this.birdNode);
+        this.isGameStart = true;
+        
     }
 
     spawnTime() {
