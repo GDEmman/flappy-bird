@@ -1,4 +1,4 @@
-﻿import { _decorator, Component, Node, RigidBody2D, Vec2, Vec3, input, Input, 
+﻿import { _decorator, Component, Node, RigidBody2D, Vec2, Vec3, input, Input, EventKeyboard, KeyCode, Prefab, instantiate, UITransform,
     EventTouch, Collider2D, Contact2DType, IPhysics2DContact,
     AudioClip, AudioSource } from 'cc';
 import { GameManager } from './GameManager';
@@ -21,6 +21,12 @@ export class Bird extends Component {
     @property({ type: AudioClip })
     deadSFX: AudioClip = null!;
 
+    @property(Prefab)
+    laserPrefab: Prefab = null!;
+
+    @property(Node)
+    laserParent: Node = null!;
+
 
     private audioSource: AudioSource = null!;
 
@@ -34,6 +40,7 @@ export class Bird extends Component {
         this.audioSource = this.node.addComponent(AudioSource);
 
         input.on(Input.EventType.MOUSE_DOWN, this.flap, this);
+        input.on(Input.EventType.KEY_DOWN, this.onKeyDown, this);
 
         const collider = this.node.getComponent(Collider2D);
         if (collider) {
@@ -60,8 +67,6 @@ export class Bird extends Component {
 
         let angle = velocity.y * 0.6;
         angle = Math.max(Math.min(angle,25), -90);
-
-        this.node.setRotationFromEuler(new Vec3(0, 0, angle));
 
         this.node.setRotationFromEuler(new Vec3(0, 0, angle));
     }
@@ -112,6 +117,32 @@ export class Bird extends Component {
     flap() {
         this.playFlapSound();
         this.rigidBody.linearVelocity = new Vec2(0, 15);
+    }
+
+    onKeyDown(event: EventKeyboard) {
+        if (event.keyCode === KeyCode.SPACE) {
+            this.shootLaser();
+        }
+    }
+
+    shootLaser() {
+        const laser = instantiate(this.laserPrefab);
+
+        // Get world position of the bird
+        const worldPos = this.node.getWorldPosition();
+
+        // Convert world position to local position of laserParent
+        const localPos = this.laserParent.getComponent(UITransform)
+            ? this.laserParent.getComponent(UITransform)!.convertToNodeSpaceAR(worldPos)
+            : worldPos;
+
+        laser.setPosition(localPos);
+
+        // Reset rotation so it's always straight
+        laser.setRotationFromEuler(0, 0, 0);
+
+        // Add to laserParent
+        this.laserParent.addChild(laser);
     }
 }
 

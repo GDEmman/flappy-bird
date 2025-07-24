@@ -15,6 +15,13 @@ export class GameManager extends Component {
     @property(Node)
     pipeParent: Node = null!;
 
+    @property(Prefab)
+    asteroidPrefab: Prefab = null!;
+
+    @property(Node)
+    asteroidParent: Node = null!;
+
+
     @property(Node)
     scoreDisplayNode: Node = null!;
 
@@ -73,6 +80,7 @@ export class GameManager extends Component {
         this.scoreDisplayNode.active = false;
         this.gameOverUI.active = false;
         this.pipeParent.active = false;
+        this.asteroidParent.active = false;
         
         this.mainMenu.active = true;
 
@@ -84,6 +92,12 @@ export class GameManager extends Component {
         if (this.timer > 2.5) {
             if(this.isGameStart == true){
                 this.spawnTime();
+                //  this.asteroidSpawnTime();
+                if(this.score >= 10){
+                    if (this.timer > 2.5) {
+                        this.asteroidSpawnTime();
+                    }
+                }
                 this.timer = 0;
             }
         }
@@ -105,6 +119,7 @@ export class GameManager extends Component {
     gameStart(){
         this.birdNode.active = true;
         this.pipeParent.active = true;
+        this.asteroidParent.active = true;
         this.mainMenu.active = false;
         this.scoreDisplayNode.active = true;
 
@@ -125,6 +140,14 @@ export class GameManager extends Component {
         const yOffset = Math.random() * 200 - 100;
         pipe.setPosition(400, yOffset);
         this.pipeParent.addChild(pipe);
+    }
+
+    asteroidSpawnTime(){
+        const asteroid = instantiate(this.asteroidPrefab);
+        const randomX = 400 + Math.random() * 200;
+        const randomY = -500 + Math.random() * 250;
+        asteroid.setPosition(randomX, randomY);
+        this.asteroidParent.addChild(asteroid);
     }
 
     increaseScore() {
