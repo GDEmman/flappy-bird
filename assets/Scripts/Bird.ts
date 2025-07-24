@@ -21,6 +21,9 @@ export class Bird extends Component {
     @property({ type: AudioClip })
     deadSFX: AudioClip = null!;
 
+    @property({ type: AudioClip })
+    scoreFX: AudioClip = null!;
+
     @property(Prefab)
     laserPrefab: Prefab = null!;
 
@@ -57,6 +60,12 @@ export class Bird extends Component {
     playDeadSound(){
          if (this.deadSFX && this.audioSource) {
             this.audioSource.playOneShot(this.deadSFX);
+        }
+    }
+
+    playScoreSound(){
+         if (this.scoreFX && this.audioSource) {
+            this.audioSource.playOneShot(this.scoreFX);
         }
     }
 
@@ -98,6 +107,7 @@ export class Bird extends Component {
 
             const managerScript = this.gameManager.getComponent(GameManager);
             managerScript?.increaseScore();
+            this.playScoreSound();
         }
 
         if(this.triggered) return;
